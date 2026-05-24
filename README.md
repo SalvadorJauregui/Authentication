@@ -119,11 +119,6 @@ The intent is to showcase clear separation of concerns between controllers, serv
   ```
 5. Use the API examples above to exercise the authentication flows.
 
-## Notes
-
-- The project is structured to demonstrate authentication architecture and REST API design.
-- The code is organized to look professional and complete for a GitHub project.
-
 ## Docs
 
 - Error responses and example curl flows: `docs/error-responses.md`
