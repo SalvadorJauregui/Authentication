@@ -11,7 +11,7 @@ public class AuthApplication {
     private static final Logger LOGGER = LogManager.getLogger(AuthApplication.class);
 
     public static void main(String[] args) {
-        LOGGER.info("Starting Auth Showcase application");
+        LOGGER.info("Starting Auth Application");
         SpringApplication.run(AuthApplication.class, args);
     }
 }

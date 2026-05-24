@@ -9,6 +9,8 @@ import com.auth.model.Role;
 import com.auth.model.User;
 import com.auth.repository.UserRepository;
 import com.auth.security.JwtProvider;
+import com.auth.model.RefreshToken;
+import com.auth.repository.RefreshTokenRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,13 +25,16 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public AuthService(UserRepository userRepository,
                        JwtProvider jwtProvider,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       RefreshTokenRepository refreshTokenRepository) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.passwordEncoder = passwordEncoder;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     public UserResponse register(RegisterRequest request) {
@@ -64,6 +69,14 @@ public class AuthService {
         String accessToken = jwtProvider.generateAccessToken(user);
         String refreshToken = jwtProvider.generateRefreshToken(user);
 
+        // Persist refresh token for revocation and later validation
+        RefreshToken rt = new RefreshToken();
+        rt.setToken(refreshToken);
+        rt.setEmail(user.getEmail());
+        rt.setExpiresAt(java.time.Instant.now().plus(java.time.Duration.ofDays(30)));
+        rt.setRevoked(false);
+        refreshTokenRepository.save(rt);
+
         LOGGER.info("User {} authenticated successfully", user.getEmail());
         return new AuthResponse(accessToken, refreshToken);
     }
@@ -73,14 +86,37 @@ public class AuthService {
             throw new IllegalArgumentException("Refresh token is invalid");
         }
 
+        // Ensure refresh token exists and is not revoked
+        RefreshToken stored = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new IllegalArgumentException("Refresh token not recognized"));
+
+        if (stored.isRevoked() || stored.getExpiresAt().isBefore(java.time.Instant.now())) {
+            throw new IllegalArgumentException("Refresh token is revoked or expired");
+        }
+
         String email = jwtProvider.getEmailFromToken(refreshToken);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User associated with refresh token not found"));
 
+        // Revoke old refresh token and issue a new one
+        stored.setRevoked(true);
+        refreshTokenRepository.revoke(stored);
+
         String newAccessToken = jwtProvider.generateAccessToken(user);
         String newRefreshToken = jwtProvider.generateRefreshToken(user);
 
+        RefreshToken rt = new RefreshToken();
+        rt.setToken(newRefreshToken);
+        rt.setEmail(user.getEmail());
+        rt.setExpiresAt(java.time.Instant.now().plus(java.time.Duration.ofDays(30)));
+        rt.setRevoked(false);
+        refreshTokenRepository.save(rt);
+
         LOGGER.info("Refreshed tokens for user {}", user.getEmail());
         return new AuthResponse(newAccessToken, newRefreshToken);
+    }
+
+    public void revokeRefreshToken(String refreshToken) {
+        refreshTokenRepository.findByToken(refreshToken).ifPresent(refreshTokenRepository::revoke);
     }
 }

@@ -1,6 +1,6 @@
-# Java Authentication Showcase
+# Java Authentication Project
 
-A clean, professional showcase implementation of a Java REST API authentication system. This project is designed to reflect modern authentication architecture, security patterns, and role-based access control best practices.
+A clean, professional implementation of a Java REST API authentication system. This project is designed to reflect modern authentication architecture, security patterns, and role-based access control best practices.
 
 ## Project Architecture
 
@@ -67,26 +67,30 @@ A clean, professional showcase implementation of a Java REST API authentication 
 ## Security Design
 
 - Stateless JWT authentication workflow
-- Refresh token issuance and validation
+- Refresh token issuance, persistence and revocation strategy
 - Role-based access control using Spring Security annotations
 - Clear separation between controllers, services, repositories, and security configuration
-- Centralized exception handling with structured API error responses
+- Centralized exception handling with structured API error responses (see `docs/error-responses.md`)
 
 ## How to Run
 
 1. Install Java 17 and Maven.
 2. Open the project root in your terminal.
 3. Build the project:
-   ```bash
-   mvn clean package
-   ```
+  ```bash
+  mvn clean package
+  ```
 4. Run the application:
-   ```bash
-   mvn spring-boot:run
-   ```
+  ```bash
+  mvn spring-boot:run
+  ```
 5. Use the API examples above to exercise the authentication flows.
 
 ## Notes
 
-- The project is structured to show authentication architecture and REST API design.
-- The code is organized to look professional and complete for a GitHub showcase.
+- The project is structured to demonstrate authentication architecture and REST API design.
+- The code is organized to look professional and complete for a GitHub project.
+
+## Docs
+
+- Error responses and example curl flows: `docs/error-responses.md`
