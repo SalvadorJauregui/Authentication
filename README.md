@@ -15,6 +15,39 @@ A clean, professional implementation of a Java REST API authentication system. T
 - `src/main/java/com/auth/exception`: centralized exception handling and API error responses
 - `src/main/resources/application.properties`: runtime configuration
 
+## Project Structure
+
+Top-level project layout and notable files:
+
+- `pom.xml` — Maven build and test configuration
+- `src/main/java/com/auth` — application sources
+  - `AuthApplication.java` — application entrypoint
+  - `DataLoader.java` — creates an initial admin user on startup
+  - `config/` — Spring Security configuration
+  - `controller/` — REST controllers (`AuthController`, `UserController`)
+  - `service/` — business logic (`AuthService`, `UserService`)
+  - `repository/` — repository interfaces and in-memory implementations
+  - `security/` — `JwtProvider`, `JwtAuthenticationFilter`
+  - `model/` — `User`, `RefreshToken`, `Role`
+  - `dto/` — request/response payloads
+  - `exception/` — centralized exception handling
+- `src/main/resources/log4j2.xml` — logging configuration
+- `docs/error-responses.md` — API error shapes and sample curl flows
+- `src/test/java` — unit tests for services and repositories
+
+## What this project does
+
+This project demonstrates a realistic authentication REST API with the following behavior:
+
+- User registration and login flows with input validation and structured responses.
+- JWT-style access tokens and refresh tokens: access tokens are issued for short-lived access, refresh tokens are persisted and managed for session continuation.
+- Refresh-token lifecycle management: refresh tokens are saved on login, validated and revoked on refresh, and can be explicitly revoked via a logout endpoint.
+- Role-based access control (RBAC): `USER` and `ADMIN` roles control access to protected endpoints.
+- In-memory repositories are provided for quick local testing; these can be replaced by DB-backed implementations with minimal code changes.
+- Startup convenience: a seeded admin account (`admin@example.com` / `Admin123!`) is created for manual testing.
+
+The intent is to showcase clear separation of concerns between controllers, services, repositories and security, and to provide practical examples of token management and RBAC.
+
 ## API Endpoints
 
 ### Authentication Endpoints
